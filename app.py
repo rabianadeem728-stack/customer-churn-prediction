@@ -63,7 +63,8 @@ page = st.sidebar.radio(
     [
         "🏠 Overview",
         "📊 Churn Analysis",
-        "🔮 Churn Prediction"
+        "🔮 Churn Prediction",
+        "💡 Business Insights"
     ]
 )
 
@@ -859,3 +860,177 @@ elif page == "🔮 Churn Prediction":
             "that a customer will churn or identify "
             "causal reasons for churn."
         )
+        # =========================================================
+# PAGE 4 — BUSINESS INSIGHTS
+# =========================================================
+
+elif page == "💡 Business Insights":
+
+    st.title("💡 Business Insights")
+
+    st.markdown(
+        """
+        This page translates churn patterns into
+        **business impact and recommended actions**.
+        """
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # REVENUE IMPACT
+    # -----------------------------------------------------
+    st.subheader("💰 Revenue Impact of Churn")
+
+    churned_df = df[df["Churn"] == "Yes"]
+
+    monthly_revenue_lost = churned_df["MonthlyCharges"].sum()
+    annual_revenue_lost = monthly_revenue_lost * 12
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Customers Churned",
+            f"{len(churned_df):,}"
+        )
+
+    with col2:
+        st.metric(
+            "Monthly Revenue Lost",
+            f"${monthly_revenue_lost:,.0f}"
+        )
+
+    with col3:
+        st.metric(
+            "Projected Annual Loss",
+            f"${annual_revenue_lost:,.0f}"
+        )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # HIGH-RISK SEGMENTS
+    # -----------------------------------------------------
+    st.subheader("🎯 Highest-Risk Segments")
+
+    segment_summary = (
+        df.groupby("Contract")["Churn"]
+        .apply(lambda x: (x == "Yes").mean() * 100)
+        .round(1)
+        .reset_index(name="Churn Rate (%)")
+        .sort_values("Churn Rate (%)", ascending=False)
+    )
+
+    st.dataframe(
+        segment_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.write(
+        "Contract type is one of the clearest churn signals "
+        "in this dataset. Segments with the highest churn "
+        "rate above represent the best targets for retention "
+        "campaigns."
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # PAYMENT METHOD RISK
+    # -----------------------------------------------------
+    st.subheader("💳 Churn Rate by Payment Method")
+
+    payment_summary = (
+        df.groupby("PaymentMethod")["Churn"]
+        .apply(lambda x: (x == "Yes").mean() * 100)
+        .round(1)
+        .reset_index(name="Churn Rate (%)")
+        .sort_values("Churn Rate (%)", ascending=False)
+    )
+
+    st.dataframe(
+        payment_summary,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # RECOMMENDED ACTIONS
+    # -----------------------------------------------------
+    st.subheader("📋 Recommended Actions")
+
+    st.markdown(
+        """
+        **1. Convert month-to-month customers**
+        Offer incentives (discounted rate, free add-on month)
+        to move month-to-month customers onto 1-year or 2-year
+        contracts, which show consistently lower churn.
+
+        **2. Target new customers early**
+        Customers with low tenure churn more often. Introduce
+        a structured onboarding or check-in process during the
+        first 90 days.
+
+        **3. Review electronic check payment experience**
+        Customers paying by electronic check tend to show
+        higher churn. Encouraging automatic payment methods
+        (bank transfer / credit card) may improve retention.
+
+        **4. Bundle protective services**
+        Customers without Online Security or Tech Support
+        show higher churn. Consider bundling these services
+        into standard packages for at-risk segments.
+        """
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # RETENTION CAMPAIGN SIMULATOR
+    # -----------------------------------------------------
+    st.subheader("🧮 Retention Campaign Simulator")
+
+    st.write(
+        "Estimate the potential savings from a retention "
+        "campaign that reduces churn by a given percentage."
+    )
+
+    reduction_pct = st.slider(
+        "Assumed reduction in churn rate (%)",
+        min_value=0,
+        max_value=50,
+        value=10
+    )
+
+    customers_saved = int(
+        len(churned_df) * (reduction_pct / 100)
+    )
+
+    revenue_saved = (
+        customers_saved
+        * df["MonthlyCharges"].mean()
+        * 12
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Customers Retained",
+            f"{customers_saved:,}"
+        )
+
+    with col2:
+        st.metric(
+            "Estimated Annual Savings",
+            f"${revenue_saved:,.0f}"
+        )
+
+    st.caption(
+        "Note: These figures are illustrative estimates based "
+        "on historical averages, not guaranteed outcomes."
+    )
