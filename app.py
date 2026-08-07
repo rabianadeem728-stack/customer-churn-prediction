@@ -192,7 +192,7 @@ if page == "🏠 Overview":
 
     st.subheader("📈 Customer Churn Distribution")
 
-    churn_counts = (
+churn_counts = (
         df["Churn"]
         .value_counts()
         .rename_axis("Churn")
@@ -200,19 +200,15 @@ if page == "🏠 Overview":
     )
 
     fig = px.bar(
-    churn_counts, x="Churn", y="Customers", color="Churn",
-    color_discrete_map={"Yes": COLOR_CHURN, "No": COLOR_STAY},
-    title="Customer Churn Distribution", text="Customers"
-)
-fig.update_layout(showlegend=False, template="plotly_white")
-st.plotly_chart(fig, use_container_width=True)
+        churn_counts, x="Churn", y="Customers", color="Churn",
+        color_discrete_map={"Yes": COLOR_CHURN, "No": COLOR_STAY},
+        title="Customer Churn Distribution", text="Customers"
     )
-
+    fig.update_layout(showlegend=False, template="plotly_white")
+    st.plotly_chart(fig, use_container_width=True)
 
     st.divider()
-
-
-    # -----------------------------------------------------
+    # -----------------------------------------------------    # -----------------------------------------------------
     # CONTRACT OVERVIEW
     # -----------------------------------------------------
 
