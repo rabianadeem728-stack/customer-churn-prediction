@@ -27,7 +27,7 @@ model_columns = joblib.load("model_columns.pkl")
 # LOAD ORIGINAL DATASET
 # =========================================================
 
-df = pd.read_csv("WA_Fn-UseC_-Telco-Customer-Churn.csv")
+df = pd.read_csv("Telco-Customer-Churn.csv")
 
 
 # Clean TotalCharges
