@@ -12,7 +12,28 @@ st.set_page_config(
     page_icon="📊",
     layout="wide"
 )
+st.markdown("""
+<style>
+[data-testid="stMetric"] {
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+}
+h1, h2, h3 {
+    font-family: 'Segoe UI', sans-serif;
+}
+.stButton>button {
+    border-radius: 8px;
+    font-weight: 600;
+}
+</style>
+""", unsafe_allow_html=True)
 
+import plotly.express as px
+
+COLOR_CHURN = "#EF553B"
+COLOR_STAY = "#00CC96"
 
 # =========================================================
 # LOAD TRAINED MODEL
@@ -178,8 +199,13 @@ if page == "🏠 Overview":
         .reset_index(name="Customers")
     )
 
-    st.bar_chart(
-        churn_counts.set_index("Churn")
+    fig = px.bar(
+    churn_counts, x="Churn", y="Customers", color="Churn",
+    color_discrete_map={"Yes": COLOR_CHURN, "No": COLOR_STAY},
+    title="Customer Churn Distribution", text="Customers"
+)
+fig.update_layout(showlegend=False, template="plotly_white")
+st.plotly_chart(fig, use_container_width=True)
     )
 
 
