@@ -88,7 +88,7 @@ st.sidebar.info(
 
 if page == "🏠 Overview":
 
-    st.title("📊 Customer Churn Prediction")
+    st.title("📊 Customer Churn Overview")
 
     st.markdown(
         """
