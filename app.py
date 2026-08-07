@@ -8,7 +8,7 @@ import joblib
 # =========================================================
 
 st.set_page_config(
-    page_title="Customer Churn Prediction",
+    page_title="Customer Churn",
     page_icon="📊",
     layout="wide"
 )
