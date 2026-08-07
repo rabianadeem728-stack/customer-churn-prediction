@@ -15,7 +15,7 @@ st.set_page_config(
 
 
 # =========================================================
-# LOAD MODEL FILES
+# LOAD TRAINED MODEL
 # =========================================================
 
 model = joblib.load("churn_model.pkl")
@@ -27,26 +27,39 @@ model_columns = joblib.load("model_columns.pkl")
 # LOAD ORIGINAL DATASET
 # =========================================================
 
-df = pd.read_csv("Telco-Customer-Churn.csv")
+# IMPORTANT:
+# Make sure this filename exactly matches your CSV filename
+# in your GitHub repository.
+
+df = pd.read_csv(
+    "Telco-Customer-Churn.csv"
+)
 
 
-# Clean TotalCharges
+# Convert TotalCharges to numeric
 df["TotalCharges"] = pd.to_numeric(
     df["TotalCharges"],
     errors="coerce"
 )
 
-df = df.dropna(subset=["TotalCharges"])
+# Remove rows where TotalCharges could not be converted
+df = df.dropna(
+    subset=["TotalCharges"]
+)
 
 
 # =========================================================
-# SIDEBAR NAVIGATION
+# SIDEBAR
 # =========================================================
 
 st.sidebar.title("📊 Customer Churn")
 
+st.sidebar.markdown(
+    "### Navigation"
+)
+
 page = st.sidebar.radio(
-    "Navigation",
+    "Go to:",
     [
         "🏠 Overview",
         "📊 Churn Analysis",
@@ -54,9 +67,23 @@ page = st.sidebar.radio(
     ]
 )
 
+st.sidebar.divider()
+
+st.sidebar.info(
+    """
+    **Customer Churn Prediction**
+
+    Machine Learning Model:
+    XGBoost
+
+    Application:
+    Streamlit
+    """
+)
+
 
 # =========================================================
-# OVERVIEW PAGE
+# PAGE 1 — OVERVIEW
 # =========================================================
 
 if page == "🏠 Overview":
@@ -65,13 +92,14 @@ if page == "🏠 Overview":
 
     st.markdown(
         """
-        ### Welcome
+        ## Welcome
 
-        This project uses **machine learning to predict customer churn**.
+        This application uses **machine learning to predict
+        customer churn**.
 
-        The objective is to identify customers who may be at risk of
-        leaving a company based on their demographic, service,
-        contract, and billing information.
+        The objective is to identify customers who may be at
+        risk of leaving a company based on their demographic,
+        service, contract, and billing information.
         """
     )
 
@@ -93,9 +121,13 @@ if page == "🏠 Overview":
         churned_customers / total_customers
     ) * 100
 
-    avg_monthly_charges = df["MonthlyCharges"].mean()
+    avg_monthly_charges = (
+        df["MonthlyCharges"].mean()
+    )
 
-    avg_tenure = df["tenure"].mean()
+    avg_tenure = (
+        df["tenure"].mean()
+    )
 
 
     # -----------------------------------------------------
@@ -150,48 +182,39 @@ if page == "🏠 Overview":
     )
 
 
+    st.divider()
+
+
     # -----------------------------------------------------
-    # CONTRACT ANALYSIS
+    # CONTRACT OVERVIEW
     # -----------------------------------------------------
 
-    st.subheader("📄 Churn by Contract Type")
+    st.subheader("📄 Customers by Contract Type")
 
-    contract_churn = pd.crosstab(
-        df["Contract"],
-        df["Churn"]
+    contract_counts = (
+        df["Contract"]
+        .value_counts()
     )
 
-    st.bar_chart(contract_churn)
-
-
-    # -----------------------------------------------------
-    # TENURE ANALYSIS
-    # -----------------------------------------------------
-
-    st.subheader("📅 Tenure Distribution by Churn")
-
-    tenure_churn = (
-        df.groupby("Churn")["tenure"]
-        .mean()
-        .round(2)
+    st.bar_chart(
+        contract_counts
     )
-
-    st.bar_chart(tenure_churn)
 
 
     st.divider()
 
 
     # -----------------------------------------------------
-    # PROJECT INFORMATION
+    # PROJECT OBJECTIVE
     # -----------------------------------------------------
 
     st.subheader("🎯 Project Objective")
 
     st.write(
         """
-        The goal of this project is to build a machine learning
-        system that predicts whether a customer is likely to churn.
+        The goal of this project is to build a machine
+        learning system that predicts whether a customer
+        is likely to churn.
 
         The project includes:
 
@@ -209,13 +232,15 @@ if page == "🏠 Overview":
 
         • Model evaluation
 
-        • Interactive Streamlit prediction
+        • Interactive prediction
 
-        • Deployment through Streamlit Community Cloud
+        • Streamlit deployment
         """
     )
+
+
 # =========================================================
-# CHURN ANALYSIS PAGE
+# PAGE 2 — CHURN ANALYSIS
 # =========================================================
 
 elif page == "📊 Churn Analysis":
@@ -224,12 +249,13 @@ elif page == "📊 Churn Analysis":
 
     st.markdown(
         """
-        Explore the main patterns and relationships
-        associated with customer churn.
+        Explore customer behavior and identify patterns
+        associated with churn.
         """
     )
 
     st.divider()
+
 
     # -----------------------------------------------------
     # CHURN DISTRIBUTION
@@ -237,16 +263,22 @@ elif page == "📊 Churn Analysis":
 
     st.subheader("📈 Overall Churn Distribution")
 
-    churn_counts = df["Churn"].value_counts()
-
-    st.bar_chart(churn_counts)
-
-    st.markdown(
-        """
-        This chart shows the number of customers who
-        churned compared with customers who stayed.
-        """
+    churn_counts = (
+        df["Churn"]
+        .value_counts()
+        .rename_axis("Churn")
+        .reset_index(name="Customers")
     )
+
+    st.bar_chart(
+        churn_counts.set_index("Churn")
+    )
+
+    st.write(
+        "This shows the number of customers who stayed "
+        "with the company compared with those who churned."
+    )
+
 
     st.divider()
 
@@ -262,14 +294,15 @@ elif page == "📊 Churn Analysis":
         df["Churn"]
     )
 
-    st.bar_chart(contract_churn)
-
-    st.markdown(
-        """
-        Contract type can be useful for understanding
-        differences in customer retention behavior.
-        """
+    st.bar_chart(
+        contract_churn
     )
+
+    st.write(
+        "Contract type can be useful for understanding "
+        "differences in customer retention patterns."
+    )
+
 
     st.divider()
 
@@ -285,7 +318,10 @@ elif page == "📊 Churn Analysis":
         df["Churn"]
     )
 
-    st.bar_chart(internet_churn)
+    st.bar_chart(
+        internet_churn
+    )
+
 
     st.divider()
 
@@ -301,7 +337,10 @@ elif page == "📊 Churn Analysis":
         df["Churn"]
     )
 
-    st.bar_chart(payment_churn)
+    st.bar_chart(
+        payment_churn
+    )
+
 
     st.divider()
 
@@ -318,7 +357,10 @@ elif page == "📊 Churn Analysis":
         .round(2)
     )
 
-    st.bar_chart(tenure_analysis)
+    st.bar_chart(
+        tenure_analysis
+    )
+
 
     st.divider()
 
@@ -335,7 +377,10 @@ elif page == "📊 Churn Analysis":
         .round(2)
     )
 
-    st.bar_chart(monthly_charges_analysis)
+    st.bar_chart(
+        monthly_charges_analysis
+    )
+
 
     st.divider()
 
@@ -348,35 +393,53 @@ elif page == "📊 Churn Analysis":
 
     st.markdown(
         """
-        - Churn behavior differs across contract types.
-        - Customer tenure can provide useful information
-          about retention patterns.
-        - Billing and payment characteristics can be
-          associated with different churn levels.
-        - These patterns were considered during the
-          machine-learning modeling process.
+        **1. Contract behavior**
+
+        Churn patterns differ across contract types.
+
+        **2. Customer tenure**
+
+        Tenure provides useful information about customer
+        retention behavior.
+
+        **3. Payment behavior**
+
+        Different payment methods show different levels
+        of churn in the dataset.
+
+        **4. Customer charges**
+
+        Monthly charges can provide useful signals for
+        identifying customers at risk of churn.
+
+        **Important:** These relationships show patterns
+        in the data; they do not by themselves prove
+        that one factor causes churn.
         """
     )
 
+
 # =========================================================
-# PREDICTION PAGE
+# PAGE 3 — CHURN PREDICTION
 # =========================================================
 
 elif page == "🔮 Churn Prediction":
 
     st.title("🔮 Customer Churn Prediction")
 
-    st.write(
-        "Enter customer information below to estimate "
-        "their probability of churn."
+    st.markdown(
+        """
+        Enter customer information below to estimate the
+        customer's probability of churn.
+        """
     )
 
     st.divider()
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # CUSTOMER INFORMATION
-    # -----------------------------------------------------
+    # =====================================================
 
     st.header("👤 Customer Information")
 
@@ -399,6 +462,7 @@ elif page == "🔮 Churn Prediction":
             ["No", "Yes"]
         )
 
+
     with col2:
 
         dependents = st.selectbox(
@@ -418,27 +482,40 @@ elif page == "🔮 Churn Prediction":
             ["No", "Yes"]
         )
 
+
     with col3:
 
         multiple_lines = st.selectbox(
             "Multiple Lines",
-            ["No phone service", "No", "Yes"]
+            [
+                "No phone service",
+                "No",
+                "Yes"
+            ]
         )
 
         internet_service = st.selectbox(
             "Internet Service",
-            ["DSL", "Fiber optic", "No"]
+            [
+                "DSL",
+                "Fiber optic",
+                "No"
+            ]
         )
 
         contract = st.selectbox(
             "Contract",
-            ["Month-to-month", "One year", "Two year"]
+            [
+                "Month-to-month",
+                "One year",
+                "Two year"
+            ]
         )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # SERVICES
-    # -----------------------------------------------------
+    # =====================================================
 
     st.header("🛠️ Services")
 
@@ -448,42 +525,68 @@ elif page == "🔮 Churn Prediction":
 
         online_security = st.selectbox(
             "Online Security",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
 
         online_backup = st.selectbox(
             "Online Backup",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
+
 
     with col2:
 
         device_protection = st.selectbox(
             "Device Protection",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
 
         tech_support = st.selectbox(
             "Tech Support",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
+
 
     with col3:
 
         streaming_tv = st.selectbox(
             "Streaming TV",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
 
         streaming_movies = st.selectbox(
             "Streaming Movies",
-            ["No internet service", "No", "Yes"]
+            [
+                "No internet service",
+                "No",
+                "Yes"
+            ]
         )
 
 
-    # -----------------------------------------------------
+    # =====================================================
     # BILLING
-    # -----------------------------------------------------
+    # =====================================================
 
     st.header("💳 Billing Information")
 
@@ -495,6 +598,7 @@ elif page == "🔮 Churn Prediction":
             "Paperless Billing",
             ["No", "Yes"]
         )
+
 
     with col2:
 
@@ -508,6 +612,7 @@ elif page == "🔮 Churn Prediction":
             ]
         )
 
+
     with col3:
 
         monthly_charges = st.number_input(
@@ -520,16 +625,18 @@ elif page == "🔮 Churn Prediction":
     total_charges = st.number_input(
         "Total Charges",
         min_value=0.0,
-        value=float(monthly_charges * tenure)
+        value=float(
+            monthly_charges * tenure
+        )
     )
 
 
     st.divider()
 
 
-    # -----------------------------------------------------
-    # PREDICTION
-    # -----------------------------------------------------
+    # =====================================================
+    # PREDICTION BUTTON
+    # =====================================================
 
     if st.button(
         "🔮 Predict Customer Churn",
@@ -537,12 +644,17 @@ elif page == "🔮 Churn Prediction":
         use_container_width=True
     ):
 
+        # -------------------------------------------------
+        # CREATE CUSTOMER DATAFRAME
+        # -------------------------------------------------
+
         customer = pd.DataFrame({
 
             "gender": [gender],
 
             "SeniorCitizen": [
-                1 if senior_citizen == "Yes" else 0
+                1 if senior_citizen == "Yes"
+                else 0
             ],
 
             "Partner": [partner],
@@ -575,39 +687,57 @@ elif page == "🔮 Churn Prediction":
 
             "PaymentMethod": [payment_method],
 
-            "MonthlyCharges": [monthly_charges],
+            "MonthlyCharges": [
+                monthly_charges
+            ],
 
-            "TotalCharges": [total_charges]
+            "TotalCharges": [
+                total_charges
+            ]
         })
 
 
-        # One-hot encoding
+        # -------------------------------------------------
+        # ONE-HOT ENCODING
+        # -------------------------------------------------
+
         customer_encoded = pd.get_dummies(
             customer,
             drop_first=True
         )
 
 
-        # Match training columns
+        # -------------------------------------------------
+        # MATCH MODEL COLUMNS
+        # -------------------------------------------------
+
         customer_encoded = customer_encoded.reindex(
             columns=model_columns,
             fill_value=0
         )
 
 
-        # Scale numerical columns
+        # -------------------------------------------------
+        # SCALE NUMERICAL FEATURES
+        # -------------------------------------------------
+
         num_cols = [
             "tenure",
             "MonthlyCharges",
             "TotalCharges"
         ]
 
-        customer_encoded[num_cols] = scaler.transform(
-            customer_encoded[num_cols]
+        customer_encoded[num_cols] = (
+            scaler.transform(
+                customer_encoded[num_cols]
+            )
         )
 
 
-        # Prediction
+        # -------------------------------------------------
+        # MODEL PREDICTION
+        # -------------------------------------------------
+
         prediction = model.predict(
             customer_encoded
         )[0]
@@ -616,12 +746,14 @@ elif page == "🔮 Churn Prediction":
             customer_encoded
         )[0][1]
 
-        probability_percent = probability * 100
+        probability_percent = (
+            probability * 100
+        )
 
 
-        # -------------------------------------------------
-        # RESULT
-        # -------------------------------------------------
+        # =================================================
+        # DISPLAY RESULT
+        # =================================================
 
         st.subheader("🎯 Prediction Result")
 
@@ -634,6 +766,12 @@ elif page == "🔮 Churn Prediction":
                 f"{probability_percent:.2f}%"
             )
 
+            st.write(
+                "This customer has a relatively low "
+                "predicted probability of churn."
+            )
+
+
         elif probability_percent < 60:
 
             st.warning(
@@ -641,6 +779,12 @@ elif page == "🔮 Churn Prediction":
                 f"Churn Probability: "
                 f"{probability_percent:.2f}%"
             )
+
+            st.write(
+                "This customer has a moderate predicted "
+                "probability of churn."
+            )
+
 
         else:
 
@@ -650,12 +794,68 @@ elif page == "🔮 Churn Prediction":
                 f"{probability_percent:.2f}%"
             )
 
+            st.write(
+                "This customer has a relatively high "
+                "predicted probability of churn."
+            )
+
+
+        # -------------------------------------------------
+        # PROBABILITY BAR
+        # -------------------------------------------------
+
+        st.write("### Churn Probability")
 
         st.progress(
             int(probability_percent)
         )
 
         st.write(
-            f"**Estimated probability of churn: "
-            f"{probability_percent:.2f}%**"
+            f"**{probability_percent:.2f}%**"
+        )
+
+
+        # -------------------------------------------------
+        # BUSINESS ACTION
+        # -------------------------------------------------
+
+        st.subheader("💡 Suggested Business Action")
+
+        if probability_percent >= 60:
+
+            st.write(
+                """
+                Consider prioritizing this customer for
+                proactive retention efforts, such as
+                personalized customer support or a
+                retention offer.
+                """
+            )
+
+        elif probability_percent >= 30:
+
+            st.write(
+                """
+                Consider monitoring this customer and
+                evaluating whether additional engagement
+                could improve retention.
+                """
+            )
+
+        else:
+
+            st.write(
+                """
+                The customer currently has a relatively
+                low predicted churn risk. Continue normal
+                customer engagement.
+                """
+            )
+
+
+        st.caption(
+            "Note: The model predicts churn risk based "
+            "on historical patterns. It does not prove "
+            "that a customer will churn or identify "
+            "causal reasons for churn."
         )
