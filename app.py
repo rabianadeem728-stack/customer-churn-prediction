@@ -49,6 +49,7 @@ page = st.sidebar.radio(
     "Navigation",
     [
         "🏠 Overview",
+        "📊 Churn Analysis",
         "🔮 Churn Prediction"
     ]
 )
@@ -213,7 +214,149 @@ if page == "🏠 Overview":
         • Deployment through Streamlit Community Cloud
         """
     )
+# =========================================================
+# CHURN ANALYSIS PAGE
+# =========================================================
 
+elif page == "📊 Churn Analysis":
+
+    st.title("📊 Customer Churn Analysis")
+
+    st.markdown(
+        """
+        Explore the main patterns and relationships
+        associated with customer churn.
+        """
+    )
+
+    st.divider()
+
+    # -----------------------------------------------------
+    # CHURN DISTRIBUTION
+    # -----------------------------------------------------
+
+    st.subheader("📈 Overall Churn Distribution")
+
+    churn_counts = df["Churn"].value_counts()
+
+    st.bar_chart(churn_counts)
+
+    st.markdown(
+        """
+        This chart shows the number of customers who
+        churned compared with customers who stayed.
+        """
+    )
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # CHURN BY CONTRACT
+    # -----------------------------------------------------
+
+    st.subheader("📄 Churn by Contract Type")
+
+    contract_churn = pd.crosstab(
+        df["Contract"],
+        df["Churn"]
+    )
+
+    st.bar_chart(contract_churn)
+
+    st.markdown(
+        """
+        Contract type can be useful for understanding
+        differences in customer retention behavior.
+        """
+    )
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # CHURN BY INTERNET SERVICE
+    # -----------------------------------------------------
+
+    st.subheader("🌐 Churn by Internet Service")
+
+    internet_churn = pd.crosstab(
+        df["InternetService"],
+        df["Churn"]
+    )
+
+    st.bar_chart(internet_churn)
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # CHURN BY PAYMENT METHOD
+    # -----------------------------------------------------
+
+    st.subheader("💳 Churn by Payment Method")
+
+    payment_churn = pd.crosstab(
+        df["PaymentMethod"],
+        df["Churn"]
+    )
+
+    st.bar_chart(payment_churn)
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # TENURE ANALYSIS
+    # -----------------------------------------------------
+
+    st.subheader("📅 Average Tenure by Churn Status")
+
+    tenure_analysis = (
+        df.groupby("Churn")["tenure"]
+        .mean()
+        .round(2)
+    )
+
+    st.bar_chart(tenure_analysis)
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # MONTHLY CHARGES
+    # -----------------------------------------------------
+
+    st.subheader("💰 Average Monthly Charges by Churn")
+
+    monthly_charges_analysis = (
+        df.groupby("Churn")["MonthlyCharges"]
+        .mean()
+        .round(2)
+    )
+
+    st.bar_chart(monthly_charges_analysis)
+
+    st.divider()
+
+
+    # -----------------------------------------------------
+    # KEY OBSERVATIONS
+    # -----------------------------------------------------
+
+    st.subheader("💡 Key Observations")
+
+    st.markdown(
+        """
+        - Churn behavior differs across contract types.
+        - Customer tenure can provide useful information
+          about retention patterns.
+        - Billing and payment characteristics can be
+          associated with different churn levels.
+        - These patterns were considered during the
+          machine-learning modeling process.
+        """
+    )
 
 # =========================================================
 # PREDICTION PAGE
